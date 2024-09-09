@@ -1,8 +1,8 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import "../Styles/Basics.css";
+import Header from "../Assets/Header.jsx";
 
-/**
- * Home page component. Contains information about the Personal Finance Tracker project.
- */
 const Home = () => {
     
     const navigate = useNavigate();
@@ -12,6 +12,8 @@ const Home = () => {
     }
     
     return (
+        <>
+        <Header />
         <div>
             <div className="home-wrapper">
                 <h1>Welcome to Personal Finance Tracker!</h1>
@@ -46,6 +48,7 @@ const Home = () => {
                 </p>
             </div>
         </div>
+        </>
     );
 };
 
