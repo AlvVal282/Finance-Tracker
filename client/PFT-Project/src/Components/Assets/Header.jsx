@@ -22,8 +22,24 @@ const Header = ({ user, setUser }) => {
         <div className="nav-left"></div>
         <ul>
           <li><Link className="nav-link" to="/">Home</Link></li>
-          <li><Link className="nav-link" to="/dashboard">Dashboard</Link></li>
-          <li><Link className="nav-link" to="/report">Report</Link></li>
+
+          <li className={isLoggedIn() ? '' : 'disabled'}>
+            <Link 
+              className="nav-link" 
+              to={isLoggedIn() ? '/dashboard' : '#'}
+            >
+              Dashboard
+            </Link>
+          </li>
+          <li className={isLoggedIn() ? '' : 'disabled'}>
+            <Link 
+              className="nav-link" 
+              to={isLoggedIn() ? '/report' : '#'}
+            >
+              Report
+            </Link>
+          </li>
+
           {isLoggedIn() ? (
             <li><Link className="nav-link" onClick={handleLogout} to="/">Logout</Link></li>
           ) : (
