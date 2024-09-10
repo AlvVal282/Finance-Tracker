@@ -1,21 +1,37 @@
-import React, { useState } from 'react';
-import '../Styles/Login.css'; // Make sure the path is correct
+import React, { useState, useEffect } from 'react';
+import '../Styles/Login.css';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from "../Assets/Header.jsx";
 
-const Login = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+const Login = ({setUser}) => {
+
+  const [formData, setFormData] = useState({
+    username: "",
+    password: ""
+  });
+
+  const handleInputChange = (e) => {
+    const {name, value} = e.target;
+    setFormData({
+        ...formData,
+        [name]: value
+    })
+  };
+
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // For navigation after successful login
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setUser({username: "", user_id: ""})
+  }, [setUser]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
         const userData = {
-          username,
-          password
+          username: formData.username,
+          password: formData.password
         };
         const response = await fetch('http://localhost:5001/api/login', {
             method: 'POST',
@@ -28,7 +44,8 @@ const Login = () => {
         const data = await response.json();
 
         if (response.ok) {
-            console.log(data.message);
+            setUser({username: userData.username, id: data.user_id});
+            console.log(data.user_id);
             navigate('/dashboard'); // Redirect to dashboard after successful login
         } else {
             // Handle login error
@@ -42,7 +59,6 @@ const Login = () => {
 
   return (
     <>
-      <Header />
       <div className="login-container">
         <div className="login-box">
           <h2>Login</h2>
@@ -54,8 +70,8 @@ const Login = () => {
                 type="text"
                 id="username"
                 name="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={formData.username}
+                onChange={handleInputChange}
                 required
               />
             </div>
@@ -65,8 +81,8 @@ const Login = () => {
                 type="password"
                 id="password"
                 name="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={handleInputChange}
                 required
               />
             </div>

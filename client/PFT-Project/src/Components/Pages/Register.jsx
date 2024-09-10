@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "../Styles/Register.css";
-import Header from "../Assets/Header.jsx";
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -85,7 +84,6 @@ const Register = () => {
 
     return (
         <>
-            <Header />
             <div className="register-container">
                 <div className="register-box">
                     <h2>Register</h2>

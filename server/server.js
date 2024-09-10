@@ -1,6 +1,11 @@
 import express from 'express';
 import cors from 'cors';
-import { isUsernameEmailTaken, registerUser, validateUser } from './database.js';
+import { 
+    isUsernameEmailTaken,
+    registerUser,
+    validateUser,
+    obtainIDByUsername 
+} from './database.js';
 
 const app = express();
 
@@ -42,7 +47,8 @@ app.post('/api/login', async (req, res) => {
     try {
         const isValid = await validateUser(username, password);
         if (isValid) {
-            res.status(200).json({ message: 'Login successful' });
+            const user_id = await obtainIDByUsername(username);
+            res.status(200).json({ message: 'Login successful', id: user_id});
         } else {
             res.status(401).json({ message: 'Invalid username or password' });
         }

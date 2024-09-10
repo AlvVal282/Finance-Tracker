@@ -1,7 +1,6 @@
 import React from 'react';
-//import '../Styles/Dashboard.css'; // Make sure the path is correct
 
-const Dashboard = () => {
+const Report = () => {
   // Dummy data for demonstration
   const balance = 1200;
   const totalIncome = 2500;
@@ -53,4 +52,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Report;

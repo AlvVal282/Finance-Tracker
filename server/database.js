@@ -14,7 +14,7 @@ const pool = mysql.createPool({
 export const isUsernameEmailTaken = async (username, email) => {
     try {
         const [rows] = await pool.query(
-            "SELECT * FROM users WHERE username = ? OR email = ?",
+            "SELECT * FROM Users WHERE username = ? OR email = ?",
             [username, email]
         );
         return rows.length > 0;
@@ -29,7 +29,7 @@ export const registerUser = async (username, email, password) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const [result] = await pool.query(
-            "INSERT INTO users (username, email, hashed_password) VALUES (?, ?, ?)",
+            "INSERT INTO Users (username, email, hashed_password) VALUES (?, ?, ?)",
             [username, email, hashedPassword]
         );
 
@@ -42,13 +42,23 @@ export const registerUser = async (username, email, password) => {
 
 export const findUserByUsername = async (username) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
-        return rows[0]; // Return the first matching row
+        const [rows] = await pool.query('SELECT * FROM Users WHERE username = ?', [username]);
+        return rows[0]; // Return first user found, if found
     } catch (error) {
         console.error('Error finding user:', error);
         throw error;
     }
 };
+
+export const obtainIDByUsername = async (username) => {
+    try {
+        const [rows] = await pool.query('SELECT user_id FROM Users WHERE username = ?', [username]);
+        return rows[0].user_id;
+    } catch (error) {
+        console.error('Error finding user_id:', error);
+        throw error;
+    }
+}
 
 export const validateUser = async (username, password) => {
     try {
@@ -57,7 +67,6 @@ export const validateUser = async (username, password) => {
 
         const hashedPassword = user.hashed_password;
 
-        // Debugging
         console.log('Retrieved hashed password:', hashedPassword);
 
         const match = await bcrypt.compare(password, hashedPassword);

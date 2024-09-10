@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../Styles/Basics.css";
-import Header from "../Assets/Header.jsx";
 
 const Home = () => {
     
@@ -13,7 +12,6 @@ const Home = () => {
     
     return (
         <>
-        <Header />
         <div>
             <div className="home-wrapper">
                 <h1>Welcome to Personal Finance Tracker!</h1>
