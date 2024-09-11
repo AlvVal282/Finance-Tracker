@@ -40,7 +40,20 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const { username, email, password, confirmPassword } = formData;
-
+        
+        const usernamePattern = /^[A-Za-z0-9]{5,50}$/; // 5 to 50 alphanumeric characters
+        const passwordPattern = /^[A-Za-z0-9]{8,128}$/; // 8 to 20 alphanumeric characters
+      
+        if (!usernamePattern.test(username)) {
+          setError("Username must be 5-50 alphanumeric characters.");
+          return;
+        }
+      
+        if (!passwordPattern.test(password)) {
+          setError("Password must be 8-128 alphanumeric characters.");
+          return;
+        }
+      
         if (password !== confirmPassword) {
             setError("Passwords do not match.");
             return;
@@ -98,6 +111,9 @@ const Register = () => {
                                 value={formData.username}
                                 onChange={handleChange}
                                 required
+                                minLength={5}  // Set minimum length
+                                maxLength={50} // Set maximum length
+                                pattern="[A-Za-z0-9]+"
                             />
                         </div>
                         <div className="input-group">
@@ -109,6 +125,7 @@ const Register = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
+                                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
                             />
                         </div>
                         <div className="input-group">
@@ -120,6 +137,9 @@ const Register = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
+                                minLength={8}  // Set minimum length
+                                maxLength={128} // Set maximum length
+                                pattern="[A-Za-z0-9]+"
                             />
                         </div>
                         <div className="input-group">
@@ -131,6 +151,9 @@ const Register = () => {
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                                 required
+                                minLength={8}  // Set minimum length
+                                maxLength={128} // Set maximum length
+                                pattern="[A-Za-z0-9]+"
                             />
                         </div>
                         <button type="submit">Register</button>

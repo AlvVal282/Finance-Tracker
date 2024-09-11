@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../Styles/Login.css';
 import { Link, useNavigate } from 'react-router-dom';
-import Header from "../Assets/Header.jsx";
 
 const Login = ({setUser}) => {
 

@@ -1,53 +1,48 @@
 import React from 'react';
-//import '../Styles/Dashboard.css'; // Make sure the path is correct
+import '../Styles/Dashboard.css';
+import { Bar, Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  PointElement,
+  LineElement,
+} from 'chart.js';
 
-const Dashboard = () => {
-  // Dummy data for demonstration
-  const balance = 1200;
-  const totalIncome = 2500;
-  const totalExpenses = 1300;
-  const recentTransactions = [
-    { date: '2024-09-01', description: 'Salary', amount: 2000 },
-    { date: '2024-09-05', description: 'Groceries', amount: -100 },
-    { date: '2024-09-10', description: 'Rent', amount: -1200 },
-  ];
+// Register necessary chart types
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  PointElement,
+  LineElement,
+);
+
+const Dashboard = ({ user, setUser }) => {
 
   return (
     <>
-      <div className="dashboard-container">
-        <div className="overview">
-          <h2>Overview</h2>
-          <div className="card">
-            <h3>Total Balance</h3>
-            <p>${balance.toFixed(2)}</p>
-          </div>
-          <div className="card">
-            <h3>Total Income</h3>
-            <p>${totalIncome.toFixed(2)}</p>
-          </div>
-          <div className="card">
-            <h3>Total Expenses</h3>
-            <p>${totalExpenses.toFixed(2)}</p>
-          </div>
-        </div>
-        <div className="recent-transactions">
-          <h2>Recent Transactions</h2>
-          <ul>
-            {recentTransactions.map((transaction, index) => (
-              <li key={index}>
-                <span>{transaction.date}</span>
-                <span>{transaction.description}</span>
-                <span>${transaction.amount.toFixed(2)}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="quick-actions">
-          <h2>Quick Actions</h2>
-          <button>Add Transaction</button>
-          <button>Set Budget</button>
-          <button>View Reports</button>
-        </div>
+      <div className='Transactions'>
+
+      </div>
+      <div className='Deposits'>
+
+      </div>
+      <div className='Accounts'>
+
+      </div>
+      <div className='Budgets'>
+
+      </div>
+      <div className='Goals'>
+        
       </div>
     </>
   );
