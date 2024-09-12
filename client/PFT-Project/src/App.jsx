@@ -13,7 +13,7 @@ function App() {
 
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user")
-    return savedUser ? JSON.parse(savedUser) : {username: "", user_id: ""}
+    return savedUser ? JSON.parse(savedUser) : {username: "", id: ""}
   });
 
   useEffect(() => {

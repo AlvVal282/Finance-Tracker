@@ -4,8 +4,11 @@ import {
     isUsernameEmailTaken,
     registerUser,
     validateUser,
-    obtainIDByUsername 
+    obtainIDByUsername,
+    getUserTransactions,
+    getDepositsByUserId 
 } from './database.js';
+import { parse } from 'dotenv';
 
 const app = express();
 
@@ -55,6 +58,38 @@ app.post('/api/login', async (req, res) => {
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.get('/api/transactions/:userId', async (req, res) => {
+    const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
+    console.log('Fetching transactions for user ID:', userId);
+    try {
+        const transactions = await getUserTransactions(userId);
+        if (transactions.length === 0) {
+            res.status(404).json({ error: 'No transactions found.' });
+        } else {
+            res.json(transactions);
+        }
+    } catch (error) {
+        console.error('Error fetching transactions:', error);
+        res.status(500).json({ error: 'An error occurred while fetching transactions.' });
+    }
+});
+
+app.get('/api/deposits/:userId', async (req, res) => {
+    const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
+    console.log('Fetching deposits for user ID:', userId);
+    try {
+        const deposits = await getDepositsByUserId(userId);
+        if (deposits.length === 0) {
+            res.status(404).json({ error: 'No deposits found.' });
+        } else {
+            res.json(deposits);
+        }
+    } catch (error) {
+        console.error('Error fetching deposits:', error);
+        res.status(500).json({ error: 'An error occurred while fetching deposits.' });
     }
 });
 

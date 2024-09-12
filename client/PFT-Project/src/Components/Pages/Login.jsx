@@ -21,7 +21,7 @@ const Login = ({setUser}) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setUser({username: "", user_id: ""})
+    setUser({username: "", id: ""})
   }, [setUser]);
 
   const handleLogin = async (e) => {
@@ -43,8 +43,8 @@ const Login = ({setUser}) => {
         const data = await response.json();
 
         if (response.ok) {
-            setUser({username: userData.username, id: data.user_id});
-            console.log(data.user_id);
+            setUser({username: userData.username, id: data.id});
+            console.log(data.id);
             navigate('/dashboard'); // Redirect to dashboard after successful login
         } else {
             // Handle login error
