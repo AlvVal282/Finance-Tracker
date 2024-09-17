@@ -6,7 +6,9 @@ import {
     validateUser,
     obtainIDByUsername,
     getUserTransactions,
-    getDepositsByUserId 
+    getUserAccounts,
+    getUserGoals,
+    getUserBudgets
 } from './database.js';
 import { parse } from 'dotenv';
 
@@ -69,6 +71,7 @@ app.get('/api/transactions/:userId', async (req, res) => {
         if (transactions.length === 0) {
             res.status(404).json({ error: 'No transactions found.' });
         } else {
+            console.log('Transactions fetched:', transactions);
             res.json(transactions);
         }
     } catch (error) {
@@ -76,22 +79,56 @@ app.get('/api/transactions/:userId', async (req, res) => {
         res.status(500).json({ error: 'An error occurred while fetching transactions.' });
     }
 });
-
-app.get('/api/deposits/:userId', async (req, res) => {
+app.get('/api/accounts/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
-    console.log('Fetching deposits for user ID:', userId);
+    console.log('Fetching accounts for user ID:', userId);
     try {
-        const deposits = await getDepositsByUserId(userId);
-        if (deposits.length === 0) {
-            res.status(404).json({ error: 'No deposits found.' });
+        const accounts = await getUserAccounts(userId);
+        if (accounts.length === 0) {
+            res.status(404).json({ error: 'No accounts found.' });
         } else {
-            res.json(deposits);
+            console.log('Accounts fetched:', accounts);
+            res.json(accounts);
         }
     } catch (error) {
-        console.error('Error fetching deposits:', error);
-        res.status(500).json({ error: 'An error occurred while fetching deposits.' });
+        console.error('Error fetching accounts:', error);
+        res.status(500).json({ error: 'An error occurred while fetching accounts.' });
     }
 });
+
+app.get('/api/goals/:userId', async (req, res) => {
+    const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
+    console.log('Fetching goals for user ID:', userId);
+    try {
+        const goals = await getUserGoals(userId);
+        if (goals.length === 0) {
+            res.status(404).json({ error: 'No goals found.' });
+        } else {
+            console.log('Goals fetched:', goals);
+            res.json(goals);
+        }
+    } catch (error) {
+        console.error('Error fetching goals:', error);
+        res.status(500).json({ error: 'An error occurred while fetching goals.' });
+    }
+});
+
+app.get('/api/budget/:userId', async (req, res) => {
+    const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
+    console.log('Fetching budget for user ID:', userId);
+    try {
+        const budget = await getUserBudgets(userId);
+        if (budget.length === 0) {
+            res.status(404).json({ error: 'No budget found.' });
+        } else {
+            console.log('Budget fetched:', budget);
+            res.json(budget);
+        }
+    } catch (error) {
+        console.error('Error fetching budget:', error);
+        res.status(500).json({ error: 'An error occurred while fetching budget.' });
+    }
+});   
 
 app.listen(5001, () => {
     console.log('Server is running on port 5001');

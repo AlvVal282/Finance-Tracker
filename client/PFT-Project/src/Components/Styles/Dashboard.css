@@ -1,0 +1,122 @@
+.box-container {
+  display: flex;
+  flex-wrap: wrap; /* Allows wrapping of items to the next line */
+  width: 100vw;
+  height: auto;
+  box-sizing: border-box;
+  gap: 1%; /* Space between items */
+}
+
+.Transaction, .Accounts, .Budgets, .Goals {
+  flex: 1 1 45%; /* Base size: takes up 45% of the container */
+  margin: 1%; /* Space between items */
+  padding: 1rem;
+  box-sizing: border-box;
+  border: 5px solid hsl(0, 0%, 55%);
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background-color: hsl(0, 0%, 100%);
+}
+
+.budget-item {
+  flex: 1 1 48%; /* Allows each budget item to take up roughly 48% of the width */
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+  border: 2px solid hsl(0, 0%, 55%);
+  border-radius: 5px;
+  background-color: hsl(0, 0%, 98%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Text styling within budget items */
+.budget-category, .budget-amount, .starting-amount, .start-date, .end-date {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 1200px) {
+  .Transaction, .Accounts, .Budgets, .Goals {
+    flex: 1 1 48%; /* Adjust width for smaller screens */
+  }
+
+  .budget-item {
+    flex: 1 1 48%; /* Allows budget items to still be side by side on medium screens */
+  }
+}
+
+@media (max-width: 900px) {
+  .Transaction, .Accounts, .Budgets, .Goals {
+    flex: 1 1 100%; /* Stacks sections in a single column on smaller screens */
+  }
+
+  .budget-item {
+    flex: 1 1 100%; /* Stacks budget items on smaller screens */
+  }
+}
+
+.header { 
+  padding-top: 0;
+  border-bottom: 5px solid hsl(0, 0%, 0%);
+  font-size: 2rem;
+  margin-bottom: 0;
+  margin-top: 5px;
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #ccc;
+  padding-right: 5px;
+}
+
+.transaction-description {
+  flex: 1;
+  text-align: left;
+  font-weight: bold;
+  font-size: 1rem; 
+}
+
+.transaction-info {
+  flex: 1;
+  text-align: left;
+  font-size: 0.9rem;
+  padding-left: 5px;
+}
+
+.transaction-details {
+  flex: 1;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+.transaction-amount {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-top: 0.2rem;
+}
+
+.transaction-amount.negative {
+  color: red;
+}
+
+.transaction-amount.positive {
+  color: green;
+}
+
+.transaction-item, .budget-item p {
+  margin: 0;
+  line-height: 1;
+}
+
+.account-item, .goal-item {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #ccc;
+  padding-right: 5px;
+}

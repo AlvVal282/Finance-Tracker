@@ -110,21 +110,16 @@ export const getUserTransactions = async (userId) => {
         throw error;
     }
   };
-
-  export const getDepositsByUserId = async (userId) => {
-    try {
+  export const getUserAccounts = async (userId) => {
+    try{
         const sql = 
         `SELECT 
-                d.deposit_id,
-                d.amount,
-                d.deposit_date,
-                d.description,
+                a.account_id,
                 a.account_name,
+                a.balance,
                 u.username
             FROM 
-                Deposits d
-            JOIN 
-                Accounts a ON d.account_id = a.account_id
+                Accounts a
             JOIN 
                 Users u ON a.user_id = u.user_id
             WHERE 
@@ -132,8 +127,57 @@ export const getUserTransactions = async (userId) => {
         `;
         const [rows] = await pool.query(sql, [userId]);
         return rows;
-    } catch (error) {
-        console.error('Error fetching deposits:', error);
-        throw error;
     }
-  };
+    catch (error) {
+        console.error('Error fetching accounts:', error);
+        throw error;
+    };
+}
+export const getUserGoals = async (userId) => {
+    try{
+        const sql = 
+        `SELECT
+                goal_id,
+                goal_name,
+                goal_amount,
+                current_amount,
+                target_date
+            FROM
+                Goals
+            WHERE
+                user_id = ?;
+        `;
+        const [rows] = await pool.query(sql, [userId]);
+        return rows;
+    }
+    catch (error) {
+        console.error('Error fetching goals:', error);
+        throw error;
+    };
+}
+export const getUserBudgets = async (userId) => {
+    try {
+        const sql =  
+        `SELECT 
+                b.budget_id,
+                b.user_id,
+                b.category_id,
+                c.category_name,
+                b.budget_amount,
+                b.starting_amount,
+                b.start_date,
+                b.end_date
+            FROM 
+                Budgets b
+            JOIN 
+                Categories c ON b.category_id = c.category_id
+            WHERE 
+                b.user_id = ?;
+        `;
+        const [rows] = await pool.query(sql, [userId]);
+        return rows;
+    } catch (error) {   
+        console.error('Error fetching budgets:', error);
+        throw error;
+    };
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../Styles/Dashboard.css';
-import { Bar, Line } from 'react-chartjs-2';
+// Import Chart.js as needed if you're still using charts elsewhere in the component
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -22,105 +22,110 @@ ChartJS.register(
   Tooltip,
   Legend,
   PointElement,
-  LineElement,
+  LineElement
 );
 
 const Dashboard = ({ user, setUser }) => {
-  const [transactionsData, setTransactionsData] = useState([]);
-  const [depositsData, setDepositsData] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [goals, setGoals] = useState([]);
+  const [budget, setBudget] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const userId = user.id; // Use user_id to fetch transactions and deposits
-    
+
         // Fetch transactions
         const transactionsResponse = await fetch(`http://localhost:5001/api/transactions/${userId}`);
         if (!transactionsResponse.ok) {
           throw new Error('Failed to fetch transactions');
         }
         const transactions = await transactionsResponse.json();
-    
-        // Process transactions data
-        const transactionLabels = transactions.length > 0 ? transactions.map(t => t.transaction_date) : [];
-        const transactionAmounts = transactions.length > 0 ? transactions.map(t => t.amount) : [];
-    
-        setTransactionsData({
-          labels: transactionLabels,
-          datasets: [
-            {
-              label: 'Total Spent',
-              data: transactionAmounts,
-              backgroundColor: '#FF6384',
-            },
-          ],
-        });
-    
-        // Fetch deposits data
-        const depositsResponse = await fetch(`http://localhost:5001/api/deposits/${userId}`);
-        if (!depositsResponse.ok) {
-          throw new Error('Failed to fetch deposits');
+
+        // Set the transactions for list display
+        setTransactions(transactions);
+
+        const accountsResponse = await fetch(`http://localhost:5001/api/accounts/${userId}`);
+        if (!accountsResponse.ok) {
+          throw new Error('Failed to fetch accounts');
         }
-        const deposits = await depositsResponse.json();
-    
-        // Process deposits data
-        const depositLabels = deposits.length > 0 ? deposits.map(d => d.deposit_date) : [];
-        const depositAmounts = deposits.length > 0 ? deposits.map(d => d.amount) : [];
-    
-        setDepositsData({
-          labels: depositLabels,
-          datasets: [
-            {
-              label: 'Total Deposited',
-              data: depositAmounts,
-              fill: false,
-              borderColor: '#36A2EB',
-            },
-          ],
-        });
+        const accounts = await accountsResponse.json();
+        setAccounts(accounts);
+
+        const goalsResponse = await fetch(`http://localhost:5001/api/goals/${userId}`);
+        if (!goalsResponse.ok) {
+          throw new Error('Failed to fetch goals');
+        }
+        const goals = await goalsResponse.json();
+        setGoals(goals);
+
+        const budgetResponse = await fetch(`http://localhost:5001/api/budget/${userId}`);
+        if (!budgetResponse.ok) {
+          throw new Error('Failed to fetch budget');
+        }
+        const budget = await budgetResponse.json();
+        setBudget(budget);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-    fetchData();    
+    fetchData();
   }, [user]);
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-    },
-  };
 
   return (
     <>
       <div className="box-container">
-        <div className="Transactions">
-          <h2>Transactions Overview</h2>
-          {transactionsData.labels ? (
-            <Bar data={transactionsData} options={chartOptions} />
-          ) : (
-            <p>Loading transactions...</p>
-          )}
-        </div>
-        <div className="Deposits">
-          <h2>Deposits Over Time</h2>
-          {depositsData.labels ? (
-            <Line data={depositsData} options={chartOptions} />
-          ) : (
-            <p>Loading deposits...</p>
-          )}
+        <div className="Transaction">
+          <h2 className='header'>Acount Activity</h2>
+          {transactions.map((transaction) => (
+          <div className="transaction-item" key={transaction.transaction_id}>
+            <div className="transaction-info">
+              <p className="transaction-date">{new Date(transaction.transaction_date).toLocaleDateString()}</p>
+              <p className="transaction-description">{transaction.description}</p>
+            </div>
+            <div className="transaction-details">
+              <p className={`transaction-amount ${transaction.amount < 0 ? 'negative' : 'positive'}`}>
+                {transaction.amount < 0 ? `- $${Math.abs(transaction.amount)}` : `+ $${transaction.amount}`}
+              </p>
+              <p>{transaction.account}</p>
+              {transaction.category_name && <p>{transaction.category_name}</p>}
+            </div>
+          </div>
+          ))}
         </div>
         <div className="Accounts">
-          {/* Add another chart or content */}
+          <h2 className='header'>Accounts</h2>
+          {accounts.map((account) => (
+            <div className="account-item" key={account.account_id}>
+              <p className="account-name">{account.account_name}</p>
+              <p className="account-balance">${account.balance}</p>
+            </div>
+          ))}
         </div>
         <div className="Budgets">
-          {/* Add another chart or content */}
+          <h2 className='header'>Budgets</h2>
+          {budget.map((budgetItem) => (
+            <div className="budget-item" key={budgetItem.budget_id}>
+              <p className="budget-category">Category: {budgetItem.category_id}</p>
+              <p className="budget-amount">Budget Amount: ${budgetItem.budget_amount}</p>
+              <p className='starting-amount'>Starting Amount: ${budgetItem.starting_amount}</p>
+              <p className='start-date'>Start Date: {new Date(budgetItem.start_date).toLocaleDateString()}</p>
+              <p className='end-date'>End Date: {new Date(budgetItem.end_date).toLocaleDateString()}</p>
+            </div>
+          ))}
         </div>
         <div className="Goals">
-          {/* Add another chart or content */}
+        <h2 className='header'>Goals</h2>
+          {goals.map((goal) => (
+            <div className="goal-item" key={goal.goal_id}>
+              <p className="goal-name">{goal.goal_name}</p>
+              <div>
+                <p className="current-amount">Current Amount: ${goal.current_amount}</p>
+                <p className="goal-amount">Goal Amount: ${goal.goal_amount}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </>
