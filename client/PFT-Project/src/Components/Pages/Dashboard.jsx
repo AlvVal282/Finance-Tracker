@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../Styles/Dashboard.css';
-// Import Chart.js as needed if you're still using charts elsewhere in the component
+import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,6 +11,7 @@ import {
   Legend,
   PointElement,
   LineElement,
+  ArcElement
 } from 'chart.js';
 
 // Register necessary chart types
@@ -22,7 +23,8 @@ ChartJS.register(
   Tooltip,
   Legend,
   PointElement,
-  LineElement
+  LineElement,
+  ArcElement
 );
 
 const Dashboard = ({ user, setUser }) => {
@@ -30,6 +32,8 @@ const Dashboard = ({ user, setUser }) => {
   const [accounts, setAccounts] = useState([]);
   const [goals, setGoals] = useState([]);
   const [budget, setBudget] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [totalMonthlyBudget, setTotalMonthlyBudget] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,8 +46,6 @@ const Dashboard = ({ user, setUser }) => {
           throw new Error('Failed to fetch transactions');
         }
         const transactions = await transactionsResponse.json();
-
-        // Set the transactions for list display
         setTransactions(transactions);
 
         const accountsResponse = await fetch(`http://localhost:5001/api/accounts/${userId}`);
@@ -66,6 +68,15 @@ const Dashboard = ({ user, setUser }) => {
         }
         const budget = await budgetResponse.json();
         setBudget(budget);
+
+        // Fetch categories
+        const categoriesResponse = await fetch('http://localhost:5001/api/categories');
+        if (!categoriesResponse.ok) {
+          throw new Error('Failed to fetch categories');
+        }
+        const categoriesData = await categoriesResponse.json();
+        setCategories(categoriesData);
+
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -73,27 +84,87 @@ const Dashboard = ({ user, setUser }) => {
     fetchData();
   }, [user]);
 
+  useEffect(() => {
+    // Calculate total monthly budget
+    const calculateTotalMonthlyBudget = () => {
+      let total = 0;
+      budget.forEach(budgetItem => {
+        const months = budgetItem.duration_weeks / 4;
+        const monthlyBudgetAmount = budgetItem.budget_amount / months;
+        total += monthlyBudgetAmount;
+      });
+      setTotalMonthlyBudget(total);
+    };
+
+    calculateTotalMonthlyBudget();
+  }, [budget]);
+
+  // Map category names to budgets
+  const budgetCategories = budget.map(item => {
+    const category = categories.find(cat => cat.category_id === item.category_id);
+    return category ? category.category_name : `Category ${item.category_id}`;
+  });
+  
+  const budgetAmounts = budget.map(item => item.budget_amount);
+  
+  const pieChartData = {
+    labels: budgetCategories,
+    datasets: [
+      {
+        label: 'Budget Amounts',
+        data: budgetAmounts,
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.2)',
+          'rgba(54, 162, 235, 0.2)',
+          'rgba(255, 206, 86, 0.2)',
+          'rgba(75, 192, 192, 0.2)',
+          'rgba(153, 102, 255, 0.2)',
+          'rgba(255, 159, 64, 0.2)',
+          'rgba(199, 199, 199, 0.2)',
+          'rgba(83, 102, 255, 0.2)',
+          'rgba(99, 255, 172, 0.2)',
+          'rgba(132, 235, 204, 0.2)',
+        ],
+        hoverBackgroundColor: [
+          'rgba(255, 99, 132, 0.5)',
+          'rgba(54, 162, 235, 0.5)',
+          'rgba(255, 206, 86, 0.5)',
+          'rgba(75, 192, 192, 0.5)',
+          'rgba(153, 102, 255, 0.5)',
+          'rgba(255, 159, 64, 0.5)',
+          'rgba(199, 199, 199, 0.5)',
+          'rgba(83, 102, 255, 0.5)',
+          'rgba(99, 255, 172, 0.5)',
+          'rgba(132, 235, 204, 0.5)',
+        ],
+      },
+    ],
+  };
+
   return (
     <>
       <div className="box-container">
+        {/* Transaction section */}
         <div className="Transaction">
-          <h2 className='header'>Acount Activity</h2>
+          <h2 className='header'>Account Activity</h2>
           {transactions.map((transaction) => (
-          <div className="transaction-item" key={transaction.transaction_id}>
-            <div className="transaction-info">
-              <p className="transaction-date">{new Date(transaction.transaction_date).toLocaleDateString()}</p>
-              <p className="transaction-description">{transaction.description}</p>
+            <div className="transaction-item" key={transaction.transaction_id}>
+              <div className="transaction-info">
+                <p className="transaction-date">{new Date(transaction.transaction_date).toLocaleDateString()}</p>
+                <p className="transaction-description">{transaction.description}</p>
+              </div>
+              <div className="transaction-details">
+                <p className={`transaction-amount ${transaction.amount < 0 ? 'negative' : 'positive'}`}>
+                  {transaction.amount < 0 ? `- $${Math.abs(transaction.amount)}` : `+ $${transaction.amount}`}
+                </p>
+                <p>{transaction.account}</p>
+                {transaction.category_name && <p>{transaction.category_name}</p>}
+              </div>
             </div>
-            <div className="transaction-details">
-              <p className={`transaction-amount ${transaction.amount < 0 ? 'negative' : 'positive'}`}>
-                {transaction.amount < 0 ? `- $${Math.abs(transaction.amount)}` : `+ $${transaction.amount}`}
-              </p>
-              <p>{transaction.account}</p>
-              {transaction.category_name && <p>{transaction.category_name}</p>}
-            </div>
-          </div>
           ))}
         </div>
+
+        {/* Accounts section */}
         <div className="Accounts">
           <h2 className='header'>Accounts</h2>
           {accounts.map((account) => (
@@ -103,20 +174,24 @@ const Dashboard = ({ user, setUser }) => {
             </div>
           ))}
         </div>
+
+        {/* Budgets section */}
         <div className="Budgets">
           <h2 className='header'>Budgets</h2>
           {budget.map((budgetItem) => (
             <div className="budget-item" key={budgetItem.budget_id}>
-              <p className="budget-category">Category: {budgetItem.category_id}</p>
+              <p className="budget-category">Category: {categories.find(cat => cat.category_id === budgetItem.category_id)?.category_name || 'Unknown'}</p>
               <p className="budget-amount">Budget Amount: ${budgetItem.budget_amount}</p>
-              <p className='starting-amount'>Starting Amount: ${budgetItem.starting_amount}</p>
-              <p className='start-date'>Start Date: {new Date(budgetItem.start_date).toLocaleDateString()}</p>
-              <p className='end-date'>End Date: {new Date(budgetItem.end_date).toLocaleDateString()}</p>
+              <p className='duration-time'>Pay Period: {budgetItem.duration_weeks} weeks</p>
             </div>
           ))}
+          <Pie data={pieChartData} />
+          <h1>Total Budget Amount Every 4 Weeks: ${totalMonthlyBudget.toFixed(2)}</h1>
         </div>
+
+        {/* Goals section */}
         <div className="Goals">
-        <h2 className='header'>Goals</h2>
+          <h2 className='header'>Goals</h2>
           {goals.map((goal) => (
             <div className="goal-item" key={goal.goal_id}>
               <p className="goal-name">{goal.goal_name}</p>

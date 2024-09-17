@@ -159,20 +159,15 @@ export const getUserBudgets = async (userId) => {
     try {
         const sql =  
         `SELECT 
-                b.budget_id,
-                b.user_id,
-                b.category_id,
-                c.category_name,
-                b.budget_amount,
-                b.starting_amount,
-                b.start_date,
-                b.end_date
+                budget_id,
+                user_id,
+                category_id,
+                budget_amount,
+                duration_weeks
             FROM 
-                Budgets b
-            JOIN 
-                Categories c ON b.category_id = c.category_id
+                Budgets
             WHERE 
-                b.user_id = ?;
+                user_id = ?;
         `;
         const [rows] = await pool.query(sql, [userId]);
         return rows;
@@ -180,4 +175,14 @@ export const getUserBudgets = async (userId) => {
         console.error('Error fetching budgets:', error);
         throw error;
     };
+}
+export const getCategories = async () => {
+    try {
+        const sql = 'SELECT category_id, category_name FROM Categories';
+        const [rows] = await pool.query(sql);
+        return rows;
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        throw error;
+    }
 }

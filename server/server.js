@@ -8,7 +8,8 @@ import {
     getUserTransactions,
     getUserAccounts,
     getUserGoals,
-    getUserBudgets
+    getUserBudgets,
+    getCategories
 } from './database.js';
 import { parse } from 'dotenv';
 
@@ -129,6 +130,22 @@ app.get('/api/budget/:userId', async (req, res) => {
         res.status(500).json({ error: 'An error occurred while fetching budget.' });
     }
 });   
+
+app.get('/api/categories', async (req, res) => {
+    console.log('Fetching categories');
+    try {
+        const categories = await getCategories();
+        if (categories.length === 0) {
+            res.status(404).json({ error: 'No categories found.' });
+        } else {
+            console.log('Categories fetched:', categories);
+            res.json(categories);
+        }
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        res.status(500).json({ error: 'An error occurred while fetching categories.' });
+    }
+});
 
 app.listen(5001, () => {
     console.log('Server is running on port 5001');
