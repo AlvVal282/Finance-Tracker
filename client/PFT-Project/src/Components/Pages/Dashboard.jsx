@@ -34,6 +34,7 @@ const Dashboard = ({ user, setUser }) => {
   const [budget, setBudget] = useState([]);
   const [categories, setCategories] = useState([]);
   const [totalMonthlyBudget, setTotalMonthlyBudget] = useState(0);
+  const [selectedChart, setSelectedChart] = useState('YearToDate');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,6 +100,88 @@ const Dashboard = ({ user, setUser }) => {
     calculateTotalMonthlyBudget();
   }, [budget]);
 
+  const filterTransactionsByDate = (transactions, startDate) => {
+      return transactions.filter(transaction => new Date(transaction.transaction_date) >= new Date(startDate));
+    };
+  
+    const calculateTotals = (transactions) => {
+      return transactions.reduce((totals, transaction) => {
+        const amount = transaction.amount;
+        if (amount > 0) {
+          totals.earnings += amount;
+        } else {
+          totals.spending += Math.abs(amount);
+        }
+        return totals;
+      }, { earnings: 0, spending: 0 });
+    };
+
+  const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+  const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);    
+  const startOfWeek = new Date(new Date().setDate(new Date().getDate() - new Date().getDay())); // Adjust as needed
+  
+  const yearToDateTransactions = filterTransactionsByDate(transactions, startOfYear);
+  const monthToDateTransactions = filterTransactionsByDate(transactions, startOfMonth);
+  const weekToDateTransactions = filterTransactionsByDate(transactions, startOfWeek);
+  
+  const yearToDateTotals = calculateTotals(yearToDateTransactions);
+  const monthToDateTotals = calculateTotals(monthToDateTransactions);
+  const weekToDateTotals = calculateTotals(weekToDateTransactions);
+
+  const pieChartDataYearToDate = {
+    labels: ['Earnings', 'Spending'],
+    datasets: [
+      {
+        label: 'Year-to-Date',
+        data: [yearToDateTotals.earnings, yearToDateTotals.spending],
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.2)',
+          'rgba(255, 99, 132, 0.2)'
+        ],
+        hoverBackgroundColor: [
+          'rgba(75, 192, 192, 0.5)',
+          'rgba(255, 99, 132, 0.5)'
+        ],
+      },
+    ],
+  };
+
+  const pieChartDataMonth = {
+    labels: ['Earnings', 'Spending'],
+    datasets: [
+      {
+        label: 'This Month',
+        data: [monthToDateTotals.earnings, monthToDateTotals.spending],
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.2)',
+          'rgba(255, 99, 132, 0.2)'
+        ],
+        hoverBackgroundColor: [
+          'rgba(75, 192, 192, 0.5)',
+          'rgba(255, 99, 132, 0.5)'
+        ],
+      },
+    ],
+  };
+
+  const pieChartDataWeek = {
+    labels: ['Earnings', 'Spending'],
+    datasets: [
+      {
+        label: 'This Week',
+        data: [weekToDateTotals.earnings, weekToDateTotals.spending],
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.2)',
+          'rgba(255, 99, 132, 0.2)'
+        ],
+        hoverBackgroundColor: [
+          'rgba(75, 192, 192, 0.5)',
+          'rgba(255, 99, 132, 0.5)'
+        ],
+      },
+    ],
+  };  
+
   // Map category names to budgets
   const budgetCategories = budget.map(item => {
     const category = categories.find(cat => cat.category_id === item.category_id);
@@ -145,7 +228,7 @@ const Dashboard = ({ user, setUser }) => {
     <>
       <div className="box-container">
         {/* Transaction section */}
-        <div className="Transaction">
+        <div className="box">
           <h2 className='header'>Account Activity</h2>
           {transactions.map((transaction) => (
             <div className="transaction-item" key={transaction.transaction_id}>
@@ -162,10 +245,16 @@ const Dashboard = ({ user, setUser }) => {
               </div>
             </div>
           ))}
+          <select value={selectedChart} onChange={(e) => setSelectedChart(e.target.value)}>
+            <option value="YearToDate">Year-to-Date</option>
+            <option value="MonthToDate">This Month</option>
+            <option value="WeekToDate">This Week</option>
+          </select>
+          <Pie data={selectedChart === 'YearToDate' ? pieChartDataYearToDate : selectedChart === 'MonthToDate' ? pieChartDataMonth : pieChartDataWeek} />
         </div>
 
         {/* Accounts section */}
-        <div className="Accounts">
+        <div className="box">
           <h2 className='header'>Accounts</h2>
           {accounts.map((account) => (
             <div className="account-item" key={account.account_id}>
@@ -176,7 +265,7 @@ const Dashboard = ({ user, setUser }) => {
         </div>
 
         {/* Budgets section */}
-        <div className="Budgets">
+        <div className="box">
           <h2 className='header'>Budgets</h2>
           {budget.map((budgetItem) => (
             <div className="budget-item" key={budgetItem.budget_id}>
@@ -190,7 +279,7 @@ const Dashboard = ({ user, setUser }) => {
         </div>
 
         {/* Goals section */}
-        <div className="Goals">
+        <div className="box">
           <h2 className='header'>Goals</h2>
           {goals.map((goal) => (
             <div className="goal-item" key={goal.goal_id}>

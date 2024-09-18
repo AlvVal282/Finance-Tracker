@@ -7,7 +7,7 @@
   gap: 1%; /* Space between items */
 }
 
-.Transaction, .Accounts, .Budgets, .Goals {
+.box {
   flex: 1 1 45%; /* Base size: takes up 45% of the container */
   margin: 1%; /* Space between items */
   padding: 1rem;
@@ -41,7 +41,7 @@
 
 /* Media Queries for Responsive Design */
 @media (max-width: 1200px) {
-  .Transaction, .Accounts, .Budgets, .Goals {
+  .box {
     flex: 1 1 48%; /* Adjust width for smaller screens */
   }
 
@@ -51,7 +51,7 @@
 }
 
 @media (max-width: 900px) {
-  .Transaction, .Accounts, .Budgets, .Goals {
+  .box {
     flex: 1 1 100%; /* Stacks sections in a single column on smaller screens */
   }
 
