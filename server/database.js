@@ -157,6 +157,32 @@ export const getUserTransactions = async (userId) => {
         throw error;
     };
 }
+
+export const addAccount = async (userId, accountName, accountType, balance) => {
+    try {
+        const sql = 'INSERT INTO Accounts (user_id, account_name, account_type, balance) VALUES (?, ?, ?, ?)';
+        const [result] = await pool.query(sql, [userId, accountName, accountType, balance]);
+        return result;
+    } catch (error) {
+        console.error('Error adding account:', error);
+        throw error;
+    }
+}
+export const deleteAccount = async (userId, accountId) => {
+    try {
+        const sql = 'DELETE FROM Transactions WHERE account_id = ?';
+        const [result] = await pool.query(sql, [accountId]);
+
+        const sql2 = 'DELETE FROM Accounts WHERE user_id = ? AND account_id = ?';
+        const [result2] = await pool.query(sql2, [userId, accountId]);
+
+        return result2;
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        throw error;
+    }
+}
+
 export const getUserGoals = async (userId) => {
     try{
         const sql = 

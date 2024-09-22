@@ -12,15 +12,17 @@ import {
     getCategories,
     validateAccount,
     addTransaction,
-    updateAccountBalance
+    updateAccountBalance,
+    addAccount,
+    deleteAccount,
 } from './database.js';
-import { parse } from 'dotenv';
+
 
 const app = express();
 
 app.use(cors({
   origin: 'http://localhost:5173',
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'DELETE', 'PUT'],
   credentials: true
 }));
 app.use(express.json());
@@ -86,6 +88,33 @@ app.post('/api/transactions', async (req, res) => {
     }
 });
 
+app.post('/api/accounts', async (req, res) => {
+    const { user_id, account_name, account_type, balance } = req.body;
+    try {
+        const account = await addAccount(user_id, account_name, account_type, balance);
+        res.status(201).json({ message: 'Account added successfully' });
+    } catch (error) {
+        console.error('Error adding account:', error);
+        res.status(500).json({ error: 'An error occurred while adding account.' });
+    }
+});
+app.delete('/api/deleteAccount', async (req, res) => {
+    const { user_id, account_id } = req.body;
+    try {
+        const result = await deleteAccount(user_id, account_id);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Account not found or does not belong to user.' });
+        }
+        console.log('Deleted account:', result);
+        res.status(201).json({ message: 'Account deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        res.status(500).json({ error: 'An error occurred while deleting the account.' });
+    }
+});
+
+
+
 app.get('/api/transactions/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
     try {
@@ -108,6 +137,7 @@ app.get('/api/accounts/:userId', async (req, res) => {
             res.status(404).json({ error: 'No accounts found.' });
         } else {
             res.json(accounts);
+            console.log('Accounts:', accounts);
         }
     } catch (error) {
         console.error('Error fetching accounts:', error);
