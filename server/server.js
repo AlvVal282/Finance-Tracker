@@ -9,7 +9,10 @@ import {
     getUserAccounts,
     getUserGoals,
     getUserBudgets,
-    getCategories
+    getCategories,
+    validateAccount,
+    addTransaction,
+    updateAccountBalance
 } from './database.js';
 import { parse } from 'dotenv';
 
@@ -64,15 +67,32 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+app.post('/api/transactions', async (req, res) => {
+    const { user_id, account_id, category_id, amount, description } = req.body;
+    console.log('Received transaction data:', req.body);
+    try {
+        const isValid = await validateAccount(account_id, user_id);
+
+        if (isValid < 1) {
+            return res.status(400).json({ error: 'Invalid account for this user.' });
+        }
+        console.log('row count:', isValid);
+        const transaction = await addTransaction(account_id, category_id, amount, description);
+        const updatedAccount = await updateAccountBalance(account_id, amount);
+        res.status(201).json({ message: 'Transaction added successfully' });
+    } catch (error) {
+        console.error('Error adding transaction:', error);
+        res.status(500).json({ error: 'An error occurred while adding transaction.' });
+    }
+});
+
 app.get('/api/transactions/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
-    console.log('Fetching transactions for user ID:', userId);
     try {
         const transactions = await getUserTransactions(userId);
         if (transactions.length === 0) {
             res.status(404).json({ error: 'No transactions found.' });
         } else {
-            console.log('Transactions fetched:', transactions);
             res.json(transactions);
         }
     } catch (error) {
@@ -82,13 +102,11 @@ app.get('/api/transactions/:userId', async (req, res) => {
 });
 app.get('/api/accounts/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
-    console.log('Fetching accounts for user ID:', userId);
     try {
         const accounts = await getUserAccounts(userId);
         if (accounts.length === 0) {
             res.status(404).json({ error: 'No accounts found.' });
         } else {
-            console.log('Accounts fetched:', accounts);
             res.json(accounts);
         }
     } catch (error) {
@@ -99,13 +117,11 @@ app.get('/api/accounts/:userId', async (req, res) => {
 
 app.get('/api/goals/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
-    console.log('Fetching goals for user ID:', userId);
     try {
         const goals = await getUserGoals(userId);
         if (goals.length === 0) {
             res.status(404).json({ error: 'No goals found.' });
         } else {
-            console.log('Goals fetched:', goals);
             res.json(goals);
         }
     } catch (error) {
@@ -116,13 +132,11 @@ app.get('/api/goals/:userId', async (req, res) => {
 
 app.get('/api/budget/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
-    console.log('Fetching budget for user ID:', userId);
     try {
         const budget = await getUserBudgets(userId);
         if (budget.length === 0) {
             res.status(404).json({ error: 'No budget found.' });
         } else {
-            console.log('Budget fetched:', budget);
             res.json(budget);
         }
     } catch (error) {
@@ -132,13 +146,11 @@ app.get('/api/budget/:userId', async (req, res) => {
 });   
 
 app.get('/api/categories', async (req, res) => {
-    console.log('Fetching categories');
     try {
         const categories = await getCategories();
         if (categories.length === 0) {
             res.status(404).json({ error: 'No categories found.' });
         } else {
-            console.log('Categories fetched:', categories);
             res.json(categories);
         }
     } catch (error) {

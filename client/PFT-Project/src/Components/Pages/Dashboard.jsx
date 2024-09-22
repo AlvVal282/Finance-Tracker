@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../Styles/Dashboard.css';
-import { Pie } from 'react-chartjs-2';
+import { Bar, Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -181,6 +181,31 @@ const Dashboard = ({ user, setUser }) => {
       },
     ],
   };  
+  const getData = (goal) => ({
+    labels: [goal.goal_name],
+    datasets: [
+      {
+        label: 'Current Amount',
+        data: [goal.current_amount],
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+      },
+      {
+        label: 'Goal Amount',
+        data: [goal.goal_amount],
+        backgroundColor: 'rgba(153, 102, 255, 0.6)',
+      },
+    ],
+  });
+  
+
+  const options = {
+    indexAxis: 'y', // This makes the bars horizontal
+    scales: {
+      x: {
+        beginAtZero: true,
+      },
+    },
+  };
 
   // Map category names to budgets
   const budgetCategories = budget.map(item => {
@@ -287,6 +312,7 @@ const Dashboard = ({ user, setUser }) => {
               <div>
                 <p className="current-amount">Current Amount: ${goal.current_amount}</p>
                 <p className="goal-amount">Goal Amount: ${goal.goal_amount}</p>
+                <Bar data={getData(goal)} options={options} />
               </div>
             </div>
           ))}

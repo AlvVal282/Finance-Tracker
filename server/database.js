@@ -80,6 +80,19 @@ export const validateUser = async (username, password) => {
     }
 };
 
+export const addTransaction = async (accountId, categoryId, amount, description) => {
+    try {
+        const sql = 
+        `INSERT INTO Transactions
+         (account_id, from_account_id, category_id, amount,
+          transaction_date, description) VALUES (?, NULL, ?, ?, curdate(), ?)`;
+        const [result] = await pool.query(sql, [accountId, categoryId, amount, description]);
+        return result;
+    } catch (error) {
+        console.error('Error adding transaction:', error);
+        throw error;
+    }
+}
 
 export const getUserTransactions = async (userId) => {
     try{
@@ -110,6 +123,17 @@ export const getUserTransactions = async (userId) => {
         throw error;
     }
   };
+  export const updateAccountBalance = async (accountId, amount) => {
+    try {
+        const sql = 'UPDATE Accounts SET balance = balance + ? WHERE account_id = ?';
+        const [result] = await pool.query(sql, [amount, accountId]);
+        return result;
+    }
+    catch (error) {
+        console.error('Error updating account balance:', error);
+        throw error;
+    }
+  };  
   export const getUserAccounts = async (userId) => {
     try{
         const sql = 
@@ -175,6 +199,16 @@ export const getUserBudgets = async (userId) => {
         console.error('Error fetching budgets:', error);
         throw error;
     };
+}
+export const validateAccount = async (accountId, userId) => {
+    try {
+        const sql = 'SELECT * FROM Accounts WHERE account_id = ? AND user_id = ?';
+        const [rows] = await pool.query(sql, [accountId, userId]);
+        return rows; // Return the rows found
+    } catch (error) {
+        console.error('Error validating account:', error);
+        throw error;
+    }
 }
 export const getCategories = async () => {
     try {

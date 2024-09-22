@@ -28,7 +28,7 @@ function App() {
       <Route path="/login" element={<Login setUser={setUser}/>}/>   
       <Route path="/register" element={<Register />} />
       <Route path="/dashboard" element={<Dashboard user={user} setUser={setUser} />} />
-      <Route path="/report" element={<Report />} />
+      <Route path="/report" element={<Report user={user} setUser={setUser} />} />
     </Routes>
     </>
   );
