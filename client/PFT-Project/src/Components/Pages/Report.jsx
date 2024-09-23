@@ -6,20 +6,56 @@ const Report = ({ user, setUser }) => {
   const [goals, setGoals] = useState([]);
   const [budget, setBudget] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [formTransaction, setFormTransaction] = useState({
-    account_id: accounts[0]?.account_id || '',
-    category_id: categories[0]?.category_id || '',
-    amount: '',
-    description: '',
-  });
-  const [formAccount, setFormAccount] = useState({
-    account_type: 'Checking',
-    account_name: '',
-    balance: '',
-  });
-  const [formRemove, setFormRemove] = useState({
-    account_id: accounts[0]?.account_id || '',
-  });
+  const [formTransaction, setFormTransaction] = useState([]);
+  const [formAccount, setFormAccount] = useState([]);
+  const [formRemove, setFormRemove] = useState([]);
+  const [formBudget, setFormBudget] = useState([]);
+  const [formRemoveBudget, setFormRemoveBudget] = useState([]);
+
+  useEffect(() => {
+  if (accounts.length > 0 && categories.length > 0) {
+    setFormTransaction({
+      account_id: accounts[0]?.account_id || '',
+      category_id: categories[0]?.category_id || '',
+      amount: '',
+      description: '',
+    });
+    setFormAccount({
+      account_type: 'Checking',
+      account_name: '',
+      balance: '',
+    });
+    setFormRemove({
+      account_id: accounts[0]?.account_id || '',
+    });
+    setFormBudget({
+      category_id: categories[0]?.category_id || '',
+      budget_amount: '',
+      starting_amount: '',
+      duration_weeks: '',
+    });
+    setFormRemoveBudget({
+      budget_id: budget.length > 0 ? budget[0].budget_id : '',
+    });
+  }
+}, [accounts, categories, budget]);
+  
+
+  const handleRemoveBudgetChange = (e) => {
+    const { name, value } = e.target;
+    setFormRemoveBudget({
+      ...formRemoveBudget,
+      [name]: value,
+    });
+  };
+
+  const handleBudgetChange = (e) => {
+    const { name, value } = e.target;
+    setFormBudget({
+      ...formBudget,
+      [name]: value,
+    });
+  };
 
   const handleRemoveChange = (e) => {
     const { name, value } = e.target;
@@ -45,6 +81,85 @@ const Report = ({ user, setUser }) => {
     });
   };
 
+  const handleRemoveBudgetEdit = async (e) => {
+    e.preventDefault();
+    try {
+      const { budget_id } = formRemoveBudget;
+      const userData = {
+        user_id: user.id,
+        budget_id,
+      };
+
+      // Send budget data
+      const budgetResponse = await fetch(`http://localhost:5001/api/deleteBudget`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!budgetResponse.ok) {
+        throw new Error('Failed to remove budget');
+      }
+      setFormRemoveBudget({
+        budget_id: budget.length > 0 ? budget[0].budget_id : '',
+      });
+
+      const budget = await fetch(`http://localhost:5001/api/budget/${user.id}`);
+      if(!budget.ok) {
+        throw new Error('Failed to fetch budget');
+      }
+      const updatedBudget = await budget.json();
+      setBudget(updatedBudget);
+    } catch (error) {
+      console.error('Error handling budget edit:', error);
+    }
+  };
+
+  const handleBudgetEdit = async (e) => {
+    e.preventDefault();
+    try {
+      const { category_id, budget_amount, starting_amount, duration_weeks } = formBudget;
+      const userData = {
+        user_id: user.id,
+        category_id,
+        budget_amount,
+        starting_amount,
+        duration_weeks,
+      };
+
+      // Send budget data
+      const budgetResponse = await fetch(`http://localhost:5001/api/budget`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      
+      if(!budgetResponse.ok) {
+        throw new Error('Failed to add budget');
+      }
+
+      setFormBudget({
+        category_id: categories[0]?.category_id || '',
+        budget_amount: '',
+        starting_amount: '',
+        duration_weeks: '',
+      });
+      
+      const budget = await fetch(`http://localhost:5001/api/budget/${user.id}`);
+      if(!budget.ok) {
+        throw new Error('Failed to fetch budget');
+      }
+      const updatedBudget = await budget.json();
+      setBudget(updatedBudget);
+    } catch (error) {
+      console.error('Error handling budget edit:', error);
+    }
+  };
+    
   const handleRemoveEdit = async (e) => {
     e.preventDefault();
     try {
@@ -199,7 +314,8 @@ const Report = ({ user, setUser }) => {
 
         const budgetResponse = await fetch(`http://localhost:5001/api/budget/${userId}`);
         if(!budgetResponse.ok) {
-          throw new Error('Failed to fetch budget');
+          const budgetData = await budgetResponse.json();
+          throw new Error('Failed to fetch budget', budgetData);
         }
         const budgetData = await budgetResponse.json();
         setBudget(budgetData);
@@ -338,9 +454,67 @@ const Report = ({ user, setUser }) => {
         <h2>Edit Budgets</h2>
         <div>
           <h3>Add Budget</h3>
+          <form onSubmit={handleBudgetEdit}>
+            <h4>Select Category</h4>
+            <select
+              name="category_id"
+              value={formBudget.category_id}
+              onChange={handleBudgetChange}
+              required>
+                {categories.map(category => (
+                  <option key={category.category_id} value={category.category_id} required>
+                    {category.category_name}
+                  </option>
+                ))}
+            </select>
+            <h4>Budget Amount</h4>
+            <input
+              type="number"
+              name="budget_amount"
+              value={formBudget.budget_amount}
+              onChange={handleBudgetChange}
+              required
+              step="any"
+              placeholder='$0.00'/>
+            <h4>Starting Amount</h4>
+            <input
+              type="number"
+              name="starting_amount"
+              value={formBudget.starting_amount}
+              onChange={handleBudgetChange}
+              required
+              step="any"
+              placeholder='$0.00'/>
+            <h4>Duration (weeks)</h4>
+            <input
+              type="number"
+              name="duration_weeks"
+              value={formBudget.duration_weeks}
+              onChange={handleBudgetChange}
+              required
+              placeholder='0'/>
+            <br/>
+            <button type="submit">Add Budget</button>
+          </form>
         </div>
         <div>
           <h3>Remove Budget</h3>
+          <form onSubmit={handleRemoveBudgetEdit}>
+            <h4>Select Budget</h4>
+            <select
+              name="budget_id"
+              value={formRemoveBudget.budget_id}
+              onChange={handleRemoveBudgetChange}
+              required>
+                {budget.map(budget => (
+                  <option key={budget.budget_id} value={budget.budget_id} required>
+                    {budget.category_name}
+                  </option>
+                ))}
+            </select>
+            <br/>
+            <button type="submit">Remove Budget</button>
+          </form>
         </div>
       </div>
 

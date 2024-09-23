@@ -205,27 +205,55 @@ export const getUserGoals = async (userId) => {
         throw error;
     };
 }
+
+export const addBudget = async (userId, categoryId, budgetAmount, startingAmount, durationWeeks) => {
+    try {
+        const sql = 'INSERT INTO Budgets (user_id, category_id, budget_amount, starting_amount, duration_weeks) VALUES (?, ?, ?, ?, ?)';
+        const [result] = await pool.query(sql, [userId, categoryId, budgetAmount, startingAmount, durationWeeks]);
+        return result;
+    } catch (error) {
+        console.error('Error adding budget:', error);
+        throw error;
+    }
+}
+
+export const deleteBudget = async (userId, budgetId) => {
+    try {
+        const sql = 'DELETE FROM Budgets WHERE user_id = ? AND budget_id = ?';
+        const [result] = await pool.query(sql, [userId, budgetId]);
+        return result;
+    } catch (error) {
+        console.error('Error deleting budget:', error);
+        throw error;
+    }
+}
+
 export const getUserBudgets = async (userId) => {
     try {
-        const sql =  
-        `SELECT 
-                budget_id,
-                user_id,
-                category_id,
-                budget_amount,
-                duration_weeks
+        const sql = `
+            SELECT 
+                b.budget_id, 
+                b.budget_amount, 
+                b.starting_amount,
+                b.duration_weeks,
+                b.category_id,
+                c.category_name
             FROM 
-                Budgets
+                Budgets b
+            JOIN 
+                Categories c ON b.category_id = c.category_id
             WHERE 
-                user_id = ?;
+                b.user_id = ?;
         `;
+        
         const [rows] = await pool.query(sql, [userId]);
         return rows;
-    } catch (error) {   
-        console.error('Error fetching budgets:', error);
+    } catch (error) {
+        console.error('Error fetching budgets for user:', error);
         throw error;
-    };
-}
+    }
+};
+
 export const validateAccount = async (accountId, userId) => {
     try {
         const sql = 'SELECT * FROM Accounts WHERE account_id = ? AND user_id = ?';

@@ -15,6 +15,8 @@ import {
     updateAccountBalance,
     addAccount,
     deleteAccount,
+    addBudget,
+    deleteBudget
 } from './database.js';
 
 
@@ -119,7 +121,7 @@ app.get('/api/transactions/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
     try {
         const transactions = await getUserTransactions(userId);
-        if (transactions.length === 0) {
+        if (transactions.length < 0) {
             res.status(404).json({ error: 'No transactions found.' });
         } else {
             res.json(transactions);
@@ -133,7 +135,7 @@ app.get('/api/accounts/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
     try {
         const accounts = await getUserAccounts(userId);
-        if (accounts.length === 0) {
+        if (accounts.length < 0) {
             res.status(404).json({ error: 'No accounts found.' });
         } else {
             res.json(accounts);
@@ -149,7 +151,7 @@ app.get('/api/goals/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
     try {
         const goals = await getUserGoals(userId);
-        if (goals.length === 0) {
+        if (goals.length < 0) {
             res.status(404).json({ error: 'No goals found.' });
         } else {
             res.json(goals);
@@ -164,7 +166,8 @@ app.get('/api/budget/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId, 10); // Use URL parameter to fetch userId
     try {
         const budget = await getUserBudgets(userId);
-        if (budget.length === 0) {
+        console.log('Budget:', budget);
+        if (budget.length < 0) {
             res.status(404).json({ error: 'No budget found.' });
         } else {
             res.json(budget);
@@ -173,7 +176,33 @@ app.get('/api/budget/:userId', async (req, res) => {
         console.error('Error fetching budget:', error);
         res.status(500).json({ error: 'An error occurred while fetching budget.' });
     }
-});   
+});  
+
+app.post('/api/budget', async (req, res) => {
+    const { user_id, category_id, budget_amount, starting_amount, duration_weeks } = req.body;
+    try {
+        const budget = await addBudget(user_id, category_id, budget_amount, starting_amount, duration_weeks);
+        res.status(201).json({ message: 'Budget added successfully' });
+    } catch (error) {
+        console.error('Error adding budget:', error);
+        res.status(500).json({ error: 'An error occurred while adding budget.' });
+    }
+});
+
+app.delete('/api/deleteBudget', async (req, res) => {
+    const { user_id, budget_id } = req.body;
+    try {
+        const result = await deleteBudget(user_id, budget_id);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Budget not found or does not belong to user.' });
+        }
+        console.log('Deleted budget:', result);
+        res.status(201).json({ message: 'Budget deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting budget:', error);
+        res.status(500).json({ error: 'An error occurred while deleting the budget.' });
+    }
+});
 
 app.get('/api/categories', async (req, res) => {
     try {
