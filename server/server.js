@@ -16,7 +16,9 @@ import {
     addAccount,
     deleteAccount,
     addBudget,
-    deleteBudget
+    deleteBudget,
+    addGoal,
+    deleteGoal
 } from './database.js';
 
 
@@ -159,6 +161,32 @@ app.get('/api/goals/:userId', async (req, res) => {
     } catch (error) {
         console.error('Error fetching goals:', error);
         res.status(500).json({ error: 'An error occurred while fetching goals.' });
+    }
+});
+
+app.post('/api/goals', async (req, res) => {
+    const { user_id, goal_name, goal_amount, current_amount, target_date } = req.body;
+    try {
+        const goal = await addGoal(user_id, goal_name, goal_amount, current_amount, target_date);
+        res.status(201).json({ message: 'Goal added successfully' });
+    } catch (error) {
+        console.error('Error adding goal:', error);
+        res.status(500).json({ error: 'An error occurred while adding goal.' });
+    }
+});
+
+app.delete('/api/deleteGoal', async (req, res) => {
+    const { user_id, goal_id } = req.body;
+    try {
+        const result = await deleteGoal(user_id, goal_id);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Goal not found or does not belong to user.' });
+        }
+        console.log('Deleted goal:', result);
+        res.status(201).json({ message: 'Goal deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting goal:', error);
+        res.status(500).json({ error: 'An error occurred while deleting the goal.' });
     }
 });
 

@@ -206,6 +206,28 @@ export const getUserGoals = async (userId) => {
     };
 }
 
+export const addGoal = async (userId, goalName, goalAmount, currentAmount, targetDate) => {
+    try {
+        const sql = 'INSERT INTO Goals (user_id, goal_name, goal_amount, current_amount, target_date) VALUES (?, ?, ?, ?, ?)';
+        const [result] = await pool.query(sql, [userId, goalName, goalAmount, currentAmount, targetDate]);
+        return result;
+    } catch (error) {
+        console.error('Error adding goal:', error);
+        throw error;
+    }
+}
+
+export const deleteGoal = async (userId, goalId) => {
+    try {
+        const sql = 'DELETE FROM Goals WHERE user_id = ? AND goal_id = ?';
+        const [result] = await pool.query(sql, [userId, goalId]);
+        return result;
+    } catch (error) {
+        console.error('Error deleting goal:', error);
+        throw error;
+    }
+}
+
 export const addBudget = async (userId, categoryId, budgetAmount, startingAmount, durationWeeks) => {
     try {
         const sql = 'INSERT INTO Budgets (user_id, category_id, budget_amount, starting_amount, duration_weeks) VALUES (?, ?, ?, ?, ?)';

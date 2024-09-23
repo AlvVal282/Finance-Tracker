@@ -11,9 +11,10 @@ const Report = ({ user, setUser }) => {
   const [formRemove, setFormRemove] = useState([]);
   const [formBudget, setFormBudget] = useState([]);
   const [formRemoveBudget, setFormRemoveBudget] = useState([]);
+  const [formGoal, setFormGoal] = useState([]);
+  const [formRemoveGoal, setFormRemoveGoal] = useState([]);
 
   useEffect(() => {
-  if (accounts.length > 0 && categories.length > 0) {
     setFormTransaction({
       account_id: accounts[0]?.account_id || '',
       category_id: categories[0]?.category_id || '',
@@ -37,9 +38,32 @@ const Report = ({ user, setUser }) => {
     setFormRemoveBudget({
       budget_id: budget.length > 0 ? budget[0].budget_id : '',
     });
-  }
-}, [accounts, categories, budget]);
+    setFormGoal({
+      goal_name: '',
+      goal_amount: '',
+      current_amount: '',
+      target_date: '',
+    });
+    setFormRemoveGoal({
+      goal_id: goals.length > 0 ? goals[0].budget_id : '',
+    });
+  }, [accounts, categories, budget, goals]);
   
+  const handleRemoveGoalChange = (e) => {
+    const { name, value } = e.target;
+    setFormRemoveGoal({
+      ...formRemoveGoal,
+      [name]: value,
+    });
+  };
+
+  const handleGoalChange = (e) => {
+    const { name, value } = e.target;
+    setFormGoal({
+      ...formGoal,
+      [name]: value,
+    });
+  };
 
   const handleRemoveBudgetChange = (e) => {
     const { name, value } = e.target;
@@ -81,6 +105,87 @@ const Report = ({ user, setUser }) => {
     });
   };
 
+  const handleRemoveGoalEdit = async (e) => {
+    e.preventDefault();
+    try {
+      const { goal_id } = formRemoveGoal;
+      const userData = {
+        user_id: user.id,
+        goal_id,
+      };
+
+      // Send goal data
+      const goalResponse = await fetch(`http://localhost:5001/api/deleteGoal`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!goalResponse.ok) {
+        throw new Error('Failed to remove goal');
+      }
+
+      setFormRemoveGoal({
+        goal_id: goals[0]?.goal_id || '',
+      });
+
+      const goalsResponse = await fetch(`http://localhost:5001/api/goals/${user.id}`);
+      if(!goalsResponse.ok) {
+        throw new Error('Failed to fetch goals');
+      }
+      const updatedGoals = await goalsResponse.json();
+      setGoals(updatedGoals);
+    } catch (error) {
+      console.error('Error handling goal edit:', error);
+    }
+  };
+
+  const handleGoalEdit = async (e) => {
+    e.preventDefault();
+    try {
+      const { goal_name, goal_amount, current_amount, target_date } = formGoal;
+      const userData = {
+        user_id: user.id,
+        goal_name,
+        goal_amount,
+        current_amount,
+        target_date,
+      };
+
+      // Send goal data
+      const goalResponse = await fetch(`http://localhost:5001/api/goals`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if(!goalResponse.ok) {
+        throw new Error('Failed to add goal');
+      }
+
+      setFormGoal({
+        goal_name: '',
+        goal_amount: '',
+        current_amount: '',
+        target_date: '',
+      });
+
+      const goalsResponse = await fetch(`http://localhost:5001/api/goals/${user.id}`);
+      if(!goalsResponse.ok) {
+        throw new Error('Failed to fetch goals');
+      }
+      const updatedGoals = await goalsResponse.json();
+      setGoals(updatedGoals);
+    } catch (error) {
+      console.error('Error handling goal edit:', error);
+    }
+  };
+
+
   const handleRemoveBudgetEdit = async (e) => {
     e.preventDefault();
     try {
@@ -91,7 +196,7 @@ const Report = ({ user, setUser }) => {
       };
 
       // Send budget data
-      const budgetResponse = await fetch(`http://localhost:5001/api/deleteBudget`, {
+      const budget = await fetch(`http://localhost:5001/api/deleteBudget`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +211,7 @@ const Report = ({ user, setUser }) => {
         budget_id: budget.length > 0 ? budget[0].budget_id : '',
       });
 
-      const budget = await fetch(`http://localhost:5001/api/budget/${user.id}`);
+      const budgetResponse = await fetch(`http://localhost:5001/api/budget/${user.id}`);
       if(!budget.ok) {
         throw new Error('Failed to fetch budget');
       }
@@ -523,9 +628,62 @@ const Report = ({ user, setUser }) => {
         <h2>Edit Goals</h2>
         <div>
           <h3>Add Goal</h3>
+          <form onSubmit={handleGoalEdit}>
+            <h4>Goal Name</h4>
+            <input
+              type="text"
+              name="goal_name"
+              value={formGoal.goal_name}
+              onChange={handleGoalChange}
+              placeholder='Goal Name'
+              required/>
+            <h4>Goal Amount</h4>
+            <input
+              type="number"
+              name="goal_amount"
+              value={formGoal.goal_amount}
+              onChange={handleGoalChange}
+              required
+              step="any"
+              placeholder='$0.00'/>
+            <h4>Current Amount</h4>
+            <input
+              type="number"
+              name="current_amount"
+              value={formGoal.current_amount}
+              onChange={handleGoalChange}
+              required
+              step="any"
+              placeholder='$0.00'/>
+            <h4>Target Date</h4>
+            <input
+              type="date"
+              name="target_date"
+              value={formGoal.target_date}
+              onChange={handleGoalChange}
+              required/>
+            <br/>
+            <button type="submit">Add Goal</button>
+            </form>
         </div>
         <div>
           <h3>Remove Goal</h3>
+          <form onSubmit={handleRemoveGoalEdit}>
+            <h4>Select Goal</h4>
+            <select
+              name="goal_id"
+              value={formRemoveGoal.goal_id}
+              onChange={handleRemoveGoalChange}
+              required>
+                {goals.map(goal => (
+                  <option key={goal.goal_id} value={goal.goal_id} required>
+                    {goal.goal_name}
+                  </option>
+                ))}
+            </select>
+            <br/>
+            <button type="submit">Remove Goal</button>
+          </form>
         </div>
       </div>
     </div>
