@@ -14,7 +14,7 @@
     border-radius: 8px;
   }
   
-  .left, .right {
+  .left, .center, .right {
     flex: 1;
     padding: 20px;
   }

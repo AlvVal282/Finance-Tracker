@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../Styles/Dashboard.css';
 import { Bar, Pie } from 'react-chartjs-2';
+import dayjs from 'dayjs';
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -198,6 +200,24 @@ const Dashboard = ({ user, setUser }) => {
   });
   
 
+  const calculateWeeklyDeposit = (goal) => {
+    const currentDate = dayjs();
+    const targetDate = dayjs(goal.target_date);
+    
+    // Calculate weeks remaining
+    const weeksRemaining = targetDate.diff(currentDate, 'week');
+  
+    // Calculate the difference between goal amount and current amount
+    const amountRemaining = goal.goal_amount - goal.current_amount;
+  
+    // Calculate the necessary weekly deposit
+    const weeklyDeposit = amountRemaining / weeksRemaining;
+  
+    return weeklyDeposit > 0 ? weeklyDeposit : 0; // Avoid negative deposits
+  }
+
+
+
   const options = {
     indexAxis: 'y', // This makes the bars horizontal
     scales: {
@@ -312,6 +332,8 @@ const Dashboard = ({ user, setUser }) => {
               <div>
                 <p className="current-amount">Current Amount: ${goal.current_amount}</p>
                 <p className="goal-amount">Goal Amount: ${goal.goal_amount}</p>
+                <p className="goal-date">Goal Date: {new Date(goal.target_date).toLocaleDateString()}</p>
+                <p className='weekly-deposit'>Weekly Deposit: ${calculateWeeklyDeposit(goal).toFixed(2)}</p>
                 <Bar data={getData(goal)} options={options} />
               </div>
             </div>

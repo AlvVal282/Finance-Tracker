@@ -18,7 +18,9 @@ import {
     addBudget,
     deleteBudget,
     addGoal,
-    deleteGoal
+    deleteGoal,
+    updateGoal,
+    updateBudget
 } from './database.js';
 
 
@@ -243,6 +245,28 @@ app.get('/api/categories', async (req, res) => {
     } catch (error) {
         console.error('Error fetching categories:', error);
         res.status(500).json({ error: 'An error occurred while fetching categories.' });
+    }
+});
+
+app.put('/api/updateGoal', async (req, res) => {
+    const { goal_id, current_amount } = req.body;
+    try {
+        const goal = await updateGoal(goal_id, current_amount);
+        res.status(201).json({ message: 'Goal updated successfully' });
+    } catch (error) {
+        console.error('Error updating goal:', error);
+        res.status(500).json({ error: 'An error occurred while updating goal.' });
+    }
+});
+
+app.put('/api/updateBudget', async (req, res) => {
+    const { budget_id, starting_amount } = req.body;
+    try {
+        const budget = await updateBudget(budget_id, starting_amount);
+        res.status(201).json({ message: 'Budget updated successfully' });
+    } catch (error) {
+        console.error('Error updating budget:', error);
+        res.status(500).json({ error: 'An error occurred while updating budget.' });
     }
 });
 

@@ -296,3 +296,25 @@ export const getCategories = async () => {
         throw error;
     }
 }
+
+export const updateGoal = async (goalId, currentAmount) => {
+    try {
+        const sql = 'UPDATE Goals SET current_amount = current_amount + ? WHERE goal_id = ?';
+        const [result] = await pool.query(sql, [currentAmount, goalId]);
+        return result;
+    } catch (error) {
+        console.error('Error updating goal:', error);
+        throw error;
+    }
+}
+
+export const updateBudget = async (budgetId, startingAmount) => {
+    try {
+        const sql = 'UPDATE Budgets SET starting_amount = starting_amount + ? WHERE budget_id = ?';
+        const [result] = await pool.query(sql, [startingAmount, budgetId]);
+        return result;
+    } catch (error) {
+        console.error('Error updating budget:', error);
+        throw error;
+    }
+}

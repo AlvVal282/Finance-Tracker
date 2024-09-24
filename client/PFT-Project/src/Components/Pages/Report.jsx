@@ -14,6 +14,8 @@ const Report = ({ user, setUser }) => {
   const [formRemoveBudget, setFormRemoveBudget] = useState([]);
   const [formGoal, setFormGoal] = useState([]);
   const [formRemoveGoal, setFormRemoveGoal] = useState([]);
+  const [formUpdateBudget, setFormUpdateBudget] = useState([]);
+  const [formUpdateGoal, setFormUpdateGoal] = useState([]);
 
   useEffect(() => {
     setFormTransaction({
@@ -48,8 +50,31 @@ const Report = ({ user, setUser }) => {
     setFormRemoveGoal({
       goal_id: goals.length > 0 ? goals[0].budget_id : 'No goals available',
     });
+    setFormUpdateBudget({
+      budget_id: budget.length > 0 ? budget[0].budget_id : 'No budgets available',
+    });
+    setFormUpdateGoal({
+      goal_id: goals.length > 0 ? goals[0].goal_id : 'No goals available',
+      current_amount: '',
+    });
   }, [accounts, categories, budget, goals]);
   
+  const handleUpdateGoalChange = (e) => {
+    const { name, value } = e.target;
+    setFormUpdateGoal({
+      ...formUpdateGoal,
+      [name]: value,
+    });
+  };
+
+  const handleUpdateBudgetChange = (e) => {
+    const { name, value } = e.target;
+    setFormUpdateBudget({
+      ...formUpdateBudget,
+      [name]: value,
+    });
+  };
+
   const handleRemoveGoalChange = (e) => {
     const { name, value } = e.target;
     setFormRemoveGoal({
@@ -106,6 +131,83 @@ const Report = ({ user, setUser }) => {
     });
   };
 
+  const handleUpdateGoalEdit = async (e) => {
+    e.preventDefault();
+    try {
+      const { goal_id, current_amount } = formUpdateGoal;
+      const userData = {
+        user_id: user.id,
+        goal_id,
+        current_amount,
+      };
+
+      // Send goal data
+      const goalResponse = await fetch(`http://localhost:5001/api/updateGoal`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      if (!goalResponse.ok) {
+        throw new Error('Failed to update goal');
+      }
+
+      setFormUpdateGoal({
+        goal_id: goals.length > 0 ? goals[0].goal_id : 'No goals available',
+        current_amount: '',
+      });
+
+      const goalsResponse = await fetch(`http://localhost:5001/api/goals/${user.id}`);
+      if(!goalsResponse.ok) {
+        throw new Error('Failed to fetch goals');
+      }
+      const updatedGoals = await goalsResponse.json();
+      setGoals(updatedGoals);
+    } catch (error) {
+      console.error('Error handling goal edit:', error);
+    }
+  };
+
+  const handleUpdateBudgetEdit = async (e) => {
+    e.preventDefault();
+    try {
+      const { budget_id, starting_amount } = formUpdateBudget;
+      const userData = {
+        user_id: user.id,
+        budget_id,
+        starting_amount,
+      };
+
+      // Send budget data
+      const budgetResponse = await fetch(`http://localhost:5001/api/updateBudget`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      if (!budgetResponse.ok) {
+        throw new Error('Failed to update budget');
+      }
+
+      setFormUpdateBudget({
+        budget_id: budget.length > 0 ? budget[0].budget_id : 'No budgets available',
+        starting_amount: '',
+      });
+
+      const budget = await fetch(`http://localhost:5001/api/budget/${user.id}`);
+      if(!budget.ok) {
+        throw new Error('Failed to fetch budget');
+      }
+      const updatedBudget = await budget.json();
+      setBudget(updatedBudget);
+    } catch (error) {
+      console.error('Error handling budget edit:', error);
+    }
+  };
+
+
   const handleRemoveGoalEdit = async (e) => {
     e.preventDefault();
     try {
@@ -123,7 +225,6 @@ const Report = ({ user, setUser }) => {
         },
         body: JSON.stringify(userData),
       });
-
       if (!goalResponse.ok) {
         throw new Error('Failed to remove goal');
       }
@@ -163,7 +264,6 @@ const Report = ({ user, setUser }) => {
         },
         body: JSON.stringify(userData),
       });
-
       if(!goalResponse.ok) {
         throw new Error('Failed to add goal');
       }
@@ -204,10 +304,10 @@ const Report = ({ user, setUser }) => {
         },
         body: JSON.stringify(userData),
       });
-
       if (!budgetResponse.ok) {
         throw new Error('Failed to remove budget');
       }
+
       setFormRemoveBudget({
         budget_id: budget.length > 0 ? budget[0].budget_id : 'No budgets available',
       });
@@ -243,7 +343,6 @@ const Report = ({ user, setUser }) => {
         },
         body: JSON.stringify(userData),
       });
-      
       if(!budgetResponse.ok) {
         throw new Error('Failed to add budget');
       }
@@ -283,7 +382,6 @@ const Report = ({ user, setUser }) => {
         },
         body: JSON.stringify(userData),
       });
-
       if (!accountResponse.ok) {
         throw new Error('Failed to remove account');
       }
@@ -324,7 +422,6 @@ const Report = ({ user, setUser }) => {
         },
         body: JSON.stringify(userData),
       });
-
       if(!accountResponse.ok) {
         throw new Error('Failed to add account');
       }
@@ -367,7 +464,6 @@ const Report = ({ user, setUser }) => {
         },
         body: JSON.stringify(userData),
       });
-  
       if (!transactionResponse.ok) {
         throw new Error('Failed to add transaction');
       }
@@ -603,7 +699,7 @@ const Report = ({ user, setUser }) => {
             <button type="submit">Add Budget</button>
           </form>
         </div>
-        <div className='right'>
+        <div className='center'>
           <h3>Remove Budget</h3>
           <form onSubmit={handleRemoveBudgetEdit}>
             <h4>Select Budget</h4>
@@ -621,6 +717,34 @@ const Report = ({ user, setUser }) => {
             <br/>
             <button type="submit">Remove Budget</button>
           </form>
+        </div>
+        <div className='right'>
+          <h3>Update a Budget</h3>
+          <form onSubmit={handleUpdateBudgetEdit}>
+            <h4>Select Budget</h4>
+            <select
+              name="budget_id"
+              value={formUpdateBudget.budget_id}
+              onChange={handleUpdateBudgetChange}
+              required>
+                {budget.map(budget => (
+                  <option key={budget.budget_id} value={budget.budget_id} required>
+                    {budget.category_name}
+                  </option>
+                ))}
+            </select>
+            <h4>Add Money to Starting Amount</h4>
+            <input
+              type="number"
+              name="starting_amount"
+              value={formUpdateBudget.starting_amount}
+              onChange={handleUpdateBudgetChange}
+              required
+              step="any"
+              placeholder='Starting Amount + $0.00'/>
+            <br/>
+            <button type="submit">Update Budget</button>
+            </form>
         </div>
       </div>
 
@@ -667,7 +791,7 @@ const Report = ({ user, setUser }) => {
             <button type="submit">Add Goal</button>
             </form>
         </div>
-        <div className='right'>
+        <div className='center'>
           <h3>Remove Goal</h3>
           <form onSubmit={handleRemoveGoalEdit}>
             <h4>Select Goal</h4>
@@ -685,6 +809,34 @@ const Report = ({ user, setUser }) => {
             <br/>
             <button type="submit">Remove Goal</button>
           </form>
+        </div>
+        <div className='right'>
+          <h3>Update a Goal</h3>
+          <form onSubmit={handleUpdateGoalEdit}>
+            <h4>Select Goal</h4>
+            <select
+              name="goal_id"
+              value={formUpdateGoal.goal_id}
+              onChange={handleUpdateGoalChange}
+              required>
+                {goals.map(goal => (
+                  <option key={goal.goal_id} value={goal.goal_id} required>
+                    {goal.goal_name}
+                  </option>
+                ))}
+            </select>
+            <h4>Add Money to Current Amount</h4>
+            <input
+              type="number"
+              name="current_amount"
+              value={formUpdateGoal.current_amount}
+              onChange={handleUpdateGoalChange}
+              required
+              step="any"
+              placeholder='Current Amount + $0.00'/>
+            <br/>
+            <button type="submit">Update Goal</button>
+            </form>
         </div>
       </div>
     </div>
