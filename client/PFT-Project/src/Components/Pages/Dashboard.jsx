@@ -333,7 +333,7 @@ const Dashboard = ({ user, setUser }) => {
                 <p className="current-amount">Current Amount: ${goal.current_amount}</p>
                 <p className="goal-amount">Goal Amount: ${goal.goal_amount}</p>
                 <p className="goal-date">Goal Date: {new Date(goal.target_date).toLocaleDateString()}</p>
-                <p className='weekly-deposit'>Weekly Deposit: ${calculateWeeklyDeposit(goal).toFixed(2)}</p>
+                <p className='weekly-deposit'>Weekly Deposits (To Hit Goal): ${calculateWeeklyDeposit(goal).toFixed(2)}</p>
                 <Bar data={getData(goal)} options={options} />
               </div>
             </div>
