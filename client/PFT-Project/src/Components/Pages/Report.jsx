@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import '../Styles/Report.css';
 
 const Report = ({ user, setUser }) => {
   const [transactions, setTransactions] = useState([]);
@@ -16,8 +17,8 @@ const Report = ({ user, setUser }) => {
 
   useEffect(() => {
     setFormTransaction({
-      account_id: accounts[0]?.account_id || '',
-      category_id: categories[0]?.category_id || '',
+      account_id: accounts[0]?.account_id || 'No accounts available',
+      category_id: categories[0]?.category_id || 'No categories available',
       amount: '',
       description: '',
     });
@@ -27,16 +28,16 @@ const Report = ({ user, setUser }) => {
       balance: '',
     });
     setFormRemove({
-      account_id: accounts[0]?.account_id || '',
+      account_id: accounts[0]?.account_id || 'No accounts available',
     });
     setFormBudget({
-      category_id: categories[0]?.category_id || '',
+      category_id: categories[0]?.category_id || 'No categories available',
       budget_amount: '',
       starting_amount: '',
       duration_weeks: '',
     });
     setFormRemoveBudget({
-      budget_id: budget.length > 0 ? budget[0].budget_id : '',
+      budget_id: budget.length > 0 ? budget[0].budget_id : 'No budgets available',
     });
     setFormGoal({
       goal_name: '',
@@ -45,7 +46,7 @@ const Report = ({ user, setUser }) => {
       target_date: '',
     });
     setFormRemoveGoal({
-      goal_id: goals.length > 0 ? goals[0].budget_id : '',
+      goal_id: goals.length > 0 ? goals[0].budget_id : 'No goals available',
     });
   }, [accounts, categories, budget, goals]);
   
@@ -208,7 +209,7 @@ const Report = ({ user, setUser }) => {
         throw new Error('Failed to remove budget');
       }
       setFormRemoveBudget({
-        budget_id: budget.length > 0 ? budget[0].budget_id : '',
+        budget_id: budget.length > 0 ? budget[0].budget_id : 'No budgets available',
       });
 
       const budgetResponse = await fetch(`http://localhost:5001/api/budget/${user.id}`);
@@ -248,7 +249,7 @@ const Report = ({ user, setUser }) => {
       }
 
       setFormBudget({
-        category_id: categories[0]?.category_id || '',
+        category_id: categories[0]?.category_id || 'No categories available',
         budget_amount: '',
         starting_amount: '',
         duration_weeks: '',
@@ -288,7 +289,7 @@ const Report = ({ user, setUser }) => {
       }
 
       setFormRemove({
-        account_id: accounts[0]?.account_id || '',
+        account_id: accounts[0]?.account_id || 'No accounts available',
       });
 
       const accountsResponse = await fetch(`http://localhost:5001/api/accounts/${user.id}`);
@@ -372,8 +373,8 @@ const Report = ({ user, setUser }) => {
       }
 
       setFormTransaction({
-        account_id: accounts[0]?.account_id || '',
-        category_id: accounts[0]?.category_id || '',
+        account_id: accounts[0]?.account_id || 'No accounts available',
+        category_id: accounts[0]?.category_id || 'No categories available',
         amount: '',
         description: '',
       });
@@ -498,7 +499,7 @@ const Report = ({ user, setUser }) => {
       {/* Edit Accounts */}
       <div className="box">
         <h2>Edit Accounts</h2>
-        <div>
+        <div className='left'>
           <h3>Add Account</h3>
           <form onSubmit={handleAccountEdit}>
             <h4>Account Type</h4>
@@ -533,7 +534,7 @@ const Report = ({ user, setUser }) => {
             <button type="submit">Add Account</button>
           </form>
         </div>
-        <div>
+        <div className='right'>
           <h3>Remove Account</h3>
           <form onSubmit={handleRemoveEdit}>
             <h4>Account Name</h4>
@@ -557,7 +558,7 @@ const Report = ({ user, setUser }) => {
       {/* Edit Budgets */}
       <div className="box">
         <h2>Edit Budgets</h2>
-        <div>
+        <div className='left'>
           <h3>Add Budget</h3>
           <form onSubmit={handleBudgetEdit}>
             <h4>Select Category</h4>
@@ -602,7 +603,7 @@ const Report = ({ user, setUser }) => {
             <button type="submit">Add Budget</button>
           </form>
         </div>
-        <div>
+        <div className='right'>
           <h3>Remove Budget</h3>
           <form onSubmit={handleRemoveBudgetEdit}>
             <h4>Select Budget</h4>
@@ -626,7 +627,7 @@ const Report = ({ user, setUser }) => {
       {/* Edit Goals */}
       <div className="box">
         <h2>Edit Goals</h2>
-        <div>
+        <div className='left'>
           <h3>Add Goal</h3>
           <form onSubmit={handleGoalEdit}>
             <h4>Goal Name</h4>
@@ -666,7 +667,7 @@ const Report = ({ user, setUser }) => {
             <button type="submit">Add Goal</button>
             </form>
         </div>
-        <div>
+        <div className='right'>
           <h3>Remove Goal</h3>
           <form onSubmit={handleRemoveGoalEdit}>
             <h4>Select Goal</h4>
