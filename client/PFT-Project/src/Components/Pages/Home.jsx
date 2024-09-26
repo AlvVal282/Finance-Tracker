@@ -2,13 +2,23 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../Styles/Basics.css";
 
-const Home = () => {
+const Home = ({ user, setUser}) => {
     
     const navigate = useNavigate();
 
     function handleRedirect() {
         navigate('/login');
     }
+
+    const isLoggedIn = () => {
+        return user !== null && user.username !== "";
+    };
+    
+    const handleLogout = () => {
+        localStorage.removeItem('user'); // Remove user data from localStorage
+        setUser({ username: "", id: "" }); // Clear user state
+        navigate('/'); // Navigate to home page
+    };
     
     return (
         <>
@@ -40,9 +50,15 @@ const Home = () => {
                 <h2>Get Started</h2>
                 <p>
                     Ready to take control of your finances? 
-                    <button onClick={handleRedirect} style={{ marginLeft: '10px', padding: '10px', fontSize: '16px' }}>
-                        Log In Now
-                    </button>
+                    {isLoggedIn() ? (
+                        <button onClick={handleLogout} style={{ marginLeft: '10px', padding: '10px', fontSize: '16px' }}>
+                            Log Out Now
+                        </button>
+                    ) : (
+                        <button onClick={handleRedirect} style={{ marginLeft: '10px', padding: '10px', fontSize: '16px' }}>
+                            Log In Now
+                        </button>
+                    )} 
                 </p>
             </div>
         </div>
