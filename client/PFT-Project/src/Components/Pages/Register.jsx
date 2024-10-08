@@ -42,7 +42,7 @@ const Register = () => {
         const { username, email, password, confirmPassword } = formData;
         
         const usernamePattern = /^[A-Za-z0-9]{5,50}$/; // 5 to 50 alphanumeric characters
-        const passwordPattern = /^[A-Za-z0-9]{8,128}$/; // 8 to 20 alphanumeric characters
+        const passwordPattern = /^[A-Za-z0-9]{8,128}$/; // 8 to 128 alphanumeric characters
       
         if (!usernamePattern.test(username)) {
           setError("Username must be 5-50 alphanumeric characters.");
